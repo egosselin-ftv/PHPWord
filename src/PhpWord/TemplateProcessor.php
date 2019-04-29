@@ -775,17 +775,16 @@ class TemplateProcessor
      */
     public function replaceBlock($blockname, $replacement)
     {
-        $matches = array();
-        preg_match(
-            '/(<\?xml.*)(<w:p.*>\${' . $blockname . '}<\/w:.*?p>)(.*)(<w:p.*\${\/' . $blockname . '}<\/w:.*?p>)/is',
-            $this->tempDocumentMainPart,
-            $matches
-        );
+        $regex = '/(<w:t>\${' . $blockname . '}.*\${\/' . $blockname . '}<\/w:.*?p>)/is';
+        preg_match($regex, $this->tempDocumentMainPart, $matches, PREG_OFFSET_CAPTURE, 0);
 
-        if (isset($matches[3])) {
+        $missingXmlStart = '<w:t>';
+        $missingXmlEnd = '</w:t></w:r></w:p>';
+
+        if (isset($matches[1])) {
             $this->tempDocumentMainPart = str_replace(
-                $matches[2] . $matches[3] . $matches[4],
-                $replacement,
+                $matches[1],
+                $missingXmlStart.$replacement.$missingXmlEnd,
                 $this->tempDocumentMainPart
             );
         }
